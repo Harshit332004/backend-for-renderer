@@ -19,6 +19,11 @@ load_dotenv(_backend_root / ".env")
 # Read connection strings
 # ---------------------------------------------------------------------------
 DATABASE_URL: str = os.environ["DATABASE_URL"]          # asyncpg URL  (postgresql+asyncpg://...)
+
+# Render/Supabase often provide 'postgresql://', but async SQLAlchemy requires 'postgresql+asyncpg://'
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 SYNC_DATABASE_URL: str = os.environ["SYNC_DATABASE_URL"]  # psycopg2 URL (postgresql+psycopg2://...)
 
 # ---------------------------------------------------------------------------
