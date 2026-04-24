@@ -11,7 +11,8 @@ router.get('/', async (req, res) => {
         const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         res.status(200).json(items);
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch vendors" });
+        console.error("Firestore error:", error);
+        res.status(500).json({ error: "Failed to fetch vendors", details: error.message });
     }
 });
 
