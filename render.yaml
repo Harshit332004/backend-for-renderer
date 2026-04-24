@@ -3,6 +3,7 @@ services:
   - type: web
     name: kiranaiq-fastapi
     env: python
+    plan: free
     rootDir: backend_new
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -22,6 +23,7 @@ services:
   - type: web
     name: kiranaiq-nodejs
     env: node
+    plan: free
     rootDir: backend_new
     buildCommand: npm install
     startCommand: node server.js
@@ -41,6 +43,7 @@ services:
   - type: web
     name: kiranaiq-frontend
     env: static
+    plan: free
     rootDir: frontend_new
     buildCommand: npm install && npm run build
     staticPublishPath: dist
