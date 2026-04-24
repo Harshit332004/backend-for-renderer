@@ -8,6 +8,7 @@ import Insights from '@/pages/Insights/Insights';
 import Settings from '@/pages/Settings/Settings';
 import Agents from '@/pages/Agents/Agents';
 import DashboardLayout from '@/components/DashboardLayout';
+import MetricsDashboard from '@/pages/Metrics/MetricsDashboard';
 
 import VendorDirectory from '@/pages/Vendors/Vendors';
 import PricingManagement from '@/pages/Pricing/Pricing';
@@ -30,6 +31,7 @@ const AppRoutes = () => {
           <Route path="/pricing" element={<PricingManagement />} />
           
           <Route path="/insights" element={<Insights />} />
+          <Route path="/metrics" element={<MetricsDashboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/agents" element={<Agents />} />
         </Route>

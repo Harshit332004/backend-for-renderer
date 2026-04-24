@@ -3,11 +3,12 @@ models.py — SQLAlchemy 2.0 ORM models for KiranaIQ (Supabase/PostgreSQL).
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Optional
 
 from sqlalchemy import (
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -110,6 +111,13 @@ class PurchaseOrder(Base):
     order_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    # --- NEW: Professor's metrics columns ---
+    ai_recommended: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
+    baseline_price: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    actual_price: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    procurement_success: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
+    fulfilled_on_time: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
+
     # Relationship
     items: Mapped[List["OrderItem"]] = relationship(
         "OrderItem", back_populates="order", cascade="all, delete-orphan"
@@ -160,6 +168,12 @@ class Supplier(Base):
     lead_time_days: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    # --- NEW: Professor's metrics columns ---
+    region: Mapped[Optional[str]] = mapped_column(String, default="Central")
+    risk_level: Mapped[Optional[str]] = mapped_column(String, default="Medium")
+    compliance_score: Mapped[Optional[float]] = mapped_column(Float, default=80.0)
+    performance_score: Mapped[Optional[float]] = mapped_column(Float, default=75.0)
+
 
 # ---------------------------------------------------------------------------
 # 7. demand_forecast
@@ -205,7 +219,7 @@ class ProactiveAlert(Base):
 
 
 # ---------------------------------------------------------------------------
-# 9. competitor_prices
+# 9. competitor_prices (existing — single-row per product)
 # ---------------------------------------------------------------------------
 class CompetitorPrice(Base):
     __tablename__ = "competitor_prices"
@@ -221,6 +235,64 @@ class CompetitorPrice(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+# ---------------------------------------------------------------------------
+# 10. competitor_pricing (NEW — time-series for professor's charts)
+# ---------------------------------------------------------------------------
+class CompetitorPricing(Base):
+    __tablename__ = "competitor_pricing"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    competitor_name: Mapped[str] = mapped_column(String, nullable=False)
+    product_name: Mapped[str] = mapped_column(String, nullable=False)
+    avg_price: Mapped[float] = mapped_column(Float, nullable=False)
+    demand_index: Mapped[float] = mapped_column(Float, default=90.0)
+    recorded_date: Mapped[date] = mapped_column(Date, nullable=False)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# 11. inventory_snapshots (NEW)
+# ---------------------------------------------------------------------------
+class InventorySnapshot(Base):
+    __tablename__ = "inventory_snapshots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    product_name: Mapped[str] = mapped_column(String, nullable=False)
+    stock_level: Mapped[int] = mapped_column(Integer, nullable=False)
+    snapshot_date: Mapped[date] = mapped_column(Date, nullable=False)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# 12. ai_response_log (NEW)
+# ---------------------------------------------------------------------------
+class AIResponseLog(Base):
+    __tablename__ = "ai_response_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    competitor_zone: Mapped[str] = mapped_column(String, nullable=False)
+    market_event_type: Mapped[str] = mapped_column(String, nullable=False)
+    market_event_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    recommendation_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    response_time_minutes: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# 13. forecast_errors (NEW)
+# ---------------------------------------------------------------------------
+class ForecastError(Base):
+    __tablename__ = "forecast_errors"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    product_name: Mapped[str] = mapped_column(String, nullable=False)
+    forecast_date: Mapped[date] = mapped_column(Date, nullable=False)
+    predicted_demand: Mapped[float] = mapped_column(Float, nullable=False)
+    actual_demand: Mapped[float] = mapped_column(Float, nullable=False)
+    forecast_error: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
 __all__ = [
     "Inventory",
     "CustomerSale",
@@ -231,4 +303,8 @@ __all__ = [
     "DemandForecast",
     "ProactiveAlert",
     "CompetitorPrice",
+    "CompetitorPricing",
+    "InventorySnapshot",
+    "AIResponseLog",
+    "ForecastError",
 ]

@@ -13,7 +13,9 @@ Features:
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from datetime import datetime
 
+from app.models import AIResponseLog
 from app.agents.intent_agent import detect_intent
 from app.agents.inventory_agent import inventory_agent, check_low_stock
 from app.agents.forecast_agent import forecast_agent
@@ -44,6 +46,7 @@ async def assistant_agent(
     history_for_llm = format_history_for_llm(history)
 
     # 2. Detect intent with conversation context
+    event_start_time = datetime.utcnow()
     agent_trace.append("intent_classifier")
     intent_data  = await detect_intent(query, conversation_history=history_for_llm)
     intent       = intent_data.get("intent", "general")
@@ -161,6 +164,9 @@ async def assistant_agent(
             message       = await _general_chat(query, history_for_llm)
             response_data = {}
 
+        if intent in ("pricing", "forecast"):
+            await log_ai_response_time(db, competitor_zone="LocalMart", event_type=intent, event_time=event_start_time)
+
     except Exception as e:
         message       = "I encountered an issue processing your request. Please try again or rephrase your question."
         response_data = {"error_detail": str(e)}
@@ -184,6 +190,19 @@ async def assistant_agent(
 
 
 # -- Helpers ------------------------------------------------------------------
+
+async def log_ai_response_time(db: AsyncSession, competitor_zone: str, event_type: str, event_time: datetime):
+    rec_time = datetime.utcnow()
+    diff_minutes = (rec_time - event_time).total_seconds() / 60.0
+    log_entry = AIResponseLog(
+        competitor_zone=competitor_zone,
+        market_event_type=event_type,
+        market_event_timestamp=event_time,
+        recommendation_timestamp=rec_time,
+        response_time_minutes=diff_minutes
+    )
+    db.add(log_entry)
+    await db.commit()
 
 async def _resolve_product_id(
     db: AsyncSession,

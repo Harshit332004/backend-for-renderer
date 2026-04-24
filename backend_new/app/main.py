@@ -62,6 +62,7 @@ from app.agents.forecast_agent import (
     forecast_agent, run_festival_advisor, generate_demand_forecast
 )
 from app.agents.proactive_agent import run_proactive_monitoring
+from app.routers.metrics import router as metrics_router
 from app.services.db_service import get_active_alerts, dismiss_alert as db_dismiss_alert
 from app.services.conversation_store import get_history, clear_history
 from app.core.cache import RedisCache
@@ -71,14 +72,38 @@ from app.schemas.models import (
 )
 
 
+# -- Background: daily inventory snapshot --------------------------------------
+async def snapshot_inventory():
+    """Snapshot current inventory levels every 24 hours for historical charts."""
+    from datetime import date as _date
+    from app.models import InventorySnapshot
+    while True:
+        await asyncio.sleep(86400)  # 24 hours
+        try:
+            async with AsyncSessionLocal() as db:
+                result = await db.execute(select(Inventory))
+                for item in result.scalars().all():
+                    snap = InventorySnapshot(
+                        product_name=item.product_name,
+                        stock_level=int(item.stock or 0),
+                        snapshot_date=_date.today(),
+                    )
+                    db.add(snap)
+                await db.commit()
+        except Exception:
+            pass  # Never crash the background task
+
+
 # -- Lifespan: start background monitoring on startup -------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize redis
     RedisCache.get_instance()
     task = asyncio.create_task(run_proactive_monitoring())
+    snap_task = asyncio.create_task(snapshot_inventory())
     yield
     task.cancel()
+    snap_task.cancel()
     await RedisCache.close()
 
 
@@ -96,6 +121,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register metrics router
+app.include_router(metrics_router, prefix="/agent/metrics", tags=["Metrics"])
 
 
 # =============================================================================
