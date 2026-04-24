@@ -4,7 +4,7 @@ import axios from 'axios';
 // MEHUL'S CODE: Node.js/Firebase Express Backend (Port 5001)
 // Required for WhatsApp AI Agent and Firebase vendors collection
 // ---------------------------------------------------------
-const API_URL = (import.meta.env.VITE_NODEJS_URL || 'http://localhost:5001') + '/api/vendors';
+const API_URL = (import.meta.env.VITE_NODEJS_URL || 'https://kiranaiq-nodejs.onrender.com') + '/api/vendors';
 
 export const getVendors = async () => {
     const response = await axios.get(API_URL);

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = (import.meta.env.VITE_NODEJS_URL || 'http://localhost:5001') + '/api/customer_sales';
+const API_URL = (import.meta.env.VITE_NODEJS_URL || 'https://kiranaiq-nodejs.onrender.com') + '/api/customer_sales';
 
 export const getCustomerSales = async () => {
     const response = await axios.get(API_URL);

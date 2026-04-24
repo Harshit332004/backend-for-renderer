@@ -5,7 +5,7 @@ import { inventoryApi } from './inventory';
 // MEHUL'S CODE: Node.js/Express Backend (Port 5001)
 // Required for the new Pricing.jsx management page
 // ---------------------------------------------------------
-const API_URL = (import.meta.env.VITE_NODEJS_URL || 'http://localhost:5001') + '/api/pricing';
+const API_URL = (import.meta.env.VITE_NODEJS_URL || 'https://kiranaiq-nodejs.onrender.com') + '/api/pricing';
 
 export const getPricing = async () => {
     const response = await axios.get(API_URL);
