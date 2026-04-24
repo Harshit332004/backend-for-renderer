@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/api/orders';
+const API_URL = (import.meta.env.VITE_NODEJS_URL || 'http://localhost:5001') + '/api/orders';
 
 export const getOrders = async () => {
     const response = await axios.get(API_URL);

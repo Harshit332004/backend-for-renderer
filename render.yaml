@@ -1,0 +1,62 @@
+services:
+  # 1. FastAPI Backend (AI Intelligence)
+  - type: web
+    name: kiranaiq-fastapi
+    env: python
+    rootDirectory: backend_new
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SYNC_DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROK_API_KEY
+        sync: false
+
+  # 2. Node.js Backend (Core API & WhatsApp)
+  - type: web
+    name: kiranaiq-nodejs
+    env: node
+    rootDirectory: backend_new
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: OWNER_WHATSAPP_NUMBER
+        sync: false
+
+  # 3. React Frontend (Web Dashboard)
+  - type: web
+    name: kiranaiq-frontend
+    env: static
+    rootDirectory: frontend_new
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+
+      - key: VITE_FASTAPI_URL
+        fromService:
+          name: kiranaiq-fastapi
+          type: web
+          property: url
+      - key: VITE_NODEJS_URL
+        fromService:
+          name: kiranaiq-nodejs
+          type: web
+          property: url

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/api/whatsapp';
+const API_URL = (import.meta.env.VITE_NODEJS_URL || 'http://localhost:5001') + '/api/whatsapp';
 
 export const contactSupplier = async ({ supplierName, supplierPhone, productName, currentStock, message }) => {
     const response = await axios.post(`${API_URL}/contact-supplier`, {
