@@ -32,8 +32,9 @@ SYNC_DATABASE_URL: str = os.environ["SYNC_DATABASE_URL"]  # psycopg2 URL (postgr
 engine = create_async_engine(
     DATABASE_URL,
     pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    pool_size=2,          # Very small pool to avoid clogging the pooler
+    max_overflow=0,       # No overflow
+    pool_recycle=300,     # Refresh every 5 mins
     echo=False,
     connect_args={
         "statement_cache_size": 0,

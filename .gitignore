@@ -59,3 +59,5 @@ dist/
 .pytest_cache/
 dump.json
 temp_sales.json
+serviceAccountKey.json
+backend_new/serviceAccountKey.json
