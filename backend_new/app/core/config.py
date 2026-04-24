@@ -17,7 +17,13 @@ _SA_KEY_PATH = os.path.abspath(
 )
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate(_SA_KEY_PATH)
+    service_account_info = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+    if service_account_info:
+        import json
+        cred = credentials.Certificate(json.loads(service_account_info))
+    else:
+        # Fallback to local file for development
+        cred = credentials.Certificate(_SA_KEY_PATH)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
