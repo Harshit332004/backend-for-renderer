@@ -43,13 +43,12 @@ services:
     env: static
     rootDirectory: frontend_new
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: dist
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
     envVars:
-
       - key: VITE_FASTAPI_URL
         fromService:
           name: kiranaiq-fastapi
