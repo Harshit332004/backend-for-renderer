@@ -9,11 +9,19 @@ class RedisCache:
     _instance: Optional[redis.Redis] = None
 
     @classmethod
-    def get_instance(cls) -> redis.Redis:
+    def get_instance(cls) -> Optional[redis.Redis]:
         if cls._instance is None:
-            redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
-            # decode_responses=True returns strings instead of bytes
-            cls._instance = redis.from_url(redis_url, decode_responses=True)
+            redis_url = os.environ.get("REDIS_URL")
+            if not redis_url or "localhost" in redis_url:
+                # Disable Redis on Render if no external Redis URL is provided
+                logger.warning("Redis URL not found or pointing to localhost. Disabling cache.")
+                return None
+            try:
+                # decode_responses=True returns strings instead of bytes
+                cls._instance = redis.from_url(redis_url, decode_responses=True)
+            except Exception as e:
+                logger.error(f"Failed to initialize Redis: {e}")
+                cls._instance = None
         return cls._instance
 
     @classmethod
