@@ -97,14 +97,17 @@ async def snapshot_inventory():
 # -- Lifespan: start background monitoring on startup -------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize redis
-    RedisCache.get_instance()
+    # Initialize redis only if enabled
+    redis_instance = RedisCache.get_instance()
+    
     task = asyncio.create_task(run_proactive_monitoring())
     snap_task = asyncio.create_task(snapshot_inventory())
     yield
     task.cancel()
     snap_task.cancel()
-    await RedisCache.close()
+    
+    if redis_instance:
+        await RedisCache.close()
 
 
 app = FastAPI(
