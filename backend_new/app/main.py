@@ -114,6 +114,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    return {
+        "error": str(exc),
+        "type": type(exc).__name__,
+        "trace": traceback.format_exc() if os.environ.get("DEBUG") else None
+    }, 500
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
