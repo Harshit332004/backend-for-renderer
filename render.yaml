@@ -50,12 +50,6 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_FASTAPI_URL
-        fromService:
-          name: kiranaiq-fastapi
-          type: web
-          property: url
+        value: https://kiranaiq-fastapi.onrender.com
       - key: VITE_NODEJS_URL
-        fromService:
-          name: kiranaiq-nodejs
-          type: web
-          property: url
+        value: https://kiranaiq-nodejs.onrender.com
