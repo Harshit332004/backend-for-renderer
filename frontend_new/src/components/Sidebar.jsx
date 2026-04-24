@@ -11,6 +11,7 @@ import {
   FileText,
   Building2,
   Tag,
+  BarChart3,
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -24,6 +25,7 @@ const Sidebar = () => {
     { path: '/vendors', icon: Building2, label: 'Vendors' },
     { path: '/pricing', icon: Tag, label: 'Pricing' },
     { path: '/insights', icon: TrendingUp, label: 'Insights' },
+    { path: '/metrics', icon: BarChart3, label: 'Analytics' },
     { path: '/agents', icon: Bot, label: 'Agents' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
